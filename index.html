@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body{
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <script type="module">
+        
+        var ws = new WebSocket("ws://127.0.0.1:9878");
+
+        import * as THREE from 'https://unpkg.com/three@0.123.0/build/three.module.js';
+
+        import { OrbitControls } from 'https://unpkg.com/three@0.123.0/examples/jsm/controls/OrbitControls.js';
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+        const renderer = new THREE.WebGLRenderer();
+        const controls = new OrbitControls( camera, renderer.domElement );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        document.body.appendChild( renderer.domElement );
+        const geometry = new THREE.BoxGeometry();
+        const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+        const cube = new THREE.Mesh( geometry, material );
+        scene.add( cube );
+        var geo = new THREE.EdgesGeometry( cube.geometry );
+        var mat = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 10 } );
+        var wireframe = new THREE.LineSegments( geo, mat );
+        wireframe.renderOrder = 1;
+        cube.add( wireframe );
+
+        camera.position.z = 10;
+        camera.position.x+=5;
+
+        controls.update();
+        function addBlock(x,y,z){
+            var mesh  = new THREE.Mesh(geometry, material);
+            mesh.position.x = x;
+            mesh.position.z = z;
+            mesh.position.y = y;
+            var geo = new THREE.EdgesGeometry( cube.geometry );
+            var mat = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 10 } );
+            var wireframe = new THREE.LineSegments( geo, mat );
+            scene.add(mesh);
+            mesh.add(wireframe);
+
+
+        }
+        function animate() {
+
+            requestAnimationFrame( animate );
+
+            controls.update();
+
+            renderer.render( scene, camera );
+
+        }
+        var xz =0;
+        var yz = 0;
+        var zz = 0;
+        function test(){
+            sendCommand("giveMap");
+        }
+        animate();
+        function sendCommand(cmd){
+            ws.send(`{"typ":"client","cmd":${cmd}}`);
+        }
+        setInterval(test,500);
+
+        ws.onmessage(function(txt){
+            txt = JSON.parse(txt);
+            console.log(txt);
+            switch(txt){
+                
+            }
+        });
+
+        /*
+        var pressedKeys = {};
+        var k="";
+        var keyDiv = document.getElementById("key1");
+
+        window.onkeyup = function (e) {
+            pressedKeys[e.code] = false;
+        }
+        window.onkeydown = function (e) {
+            pressedKeys[e.code] = true;
+        }
+        function spr(){
+
+            if(pressedKeys["KeyA"]!= false){
+                if(pressedKeys["KeyA"]==true){
+                    camera.position.z-=1;
+                    k="a";
+                }else{
+                    k="nic"
+                }
+            }else{
+                if(pressedKeys["KeyW"]!= false){
+                    if(pressedKeys["KeyW"]==true){
+                        camera.position.x+=1;
+                        k= "w";
+                    }else{
+                        k="nic"
+                    }
+                }else{
+                    if(pressedKeys["KeyS"]!= false){
+                        if(pressedKeys["KeyS"]==true){
+                            camera.position.x-=1;
+                            k= "s";
+                        }else{
+                            k="nic"
+                        }
+                    }else{
+                        if(pressedKeys["KeyD"]!= false){
+                            if(pressedKeys["KeyD"]==true){
+                                camera.position.z+=1;
+                                k= "d";
+                            }else{
+                                k="nic"
+                            }
+                        }else{
+                            k="nic";
+                        }}}}
+            keyDiv.innerHTML=k;
+        }
+        setInterval(spr,100);
+
+         */
+    </script>
+</body>
+<script>
+
+</script>
+</html>
