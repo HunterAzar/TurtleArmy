@@ -44,6 +44,8 @@ function goCheck(ws,ile)
     blocks = {}
     ws.send("sprawdzanko")
     for i=0,ile,1 do
+        gg, ggg = turtle.inspectDown()
+        checkSend(ws,gg,ggg,x,y-1,z)
         gg, ggg = turtle.inspect()
         checkSend(ws,gg,ggg,x+1,y,z)
         gg, ggg = turtle.inspectUp()

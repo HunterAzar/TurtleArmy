@@ -49,7 +49,9 @@ wsServer.on('request', function(request) {
                 }
                 if(json.typ == "client"){
                     if(json.cmd == "giveMap"){
-                        
+                        db.each("select x,y,z,name from blocks",function(err,row){
+                            connection.send(`{"typ":"jsonMap","x":${row.x},"y":${row.y},"z":${row.z},"name":"${row.name}"}`);
+                        });
                     }
                 }
             }

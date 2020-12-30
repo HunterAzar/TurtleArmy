@@ -12,14 +12,16 @@
 </head>
 <body>
     <script type="module">
-        
+        var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//mrdoob.github.io/stats.js/build/stats.min.js';document.head.appendChild(script);
         var ws = new WebSocket("ws://127.0.0.1:9878");
 
         import * as THREE from 'https://unpkg.com/three@0.123.0/build/three.module.js';
-
         import { OrbitControls } from 'https://unpkg.com/three@0.123.0/examples/jsm/controls/OrbitControls.js';
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
 
         const renderer = new THREE.WebGLRenderer();
         const controls = new OrbitControls( camera, renderer.domElement );
@@ -28,32 +30,144 @@
         const geometry = new THREE.BoxGeometry();
         const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
         const cube = new THREE.Mesh( geometry, material );
-        scene.add( cube );
-        var geo = new THREE.EdgesGeometry( cube.geometry );
-        var mat = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 10 } );
-        var wireframe = new THREE.LineSegments( geo, mat );
-        wireframe.renderOrder = 1;
-        cube.add( wireframe );
 
         camera.position.z = 10;
         camera.position.x+=5;
+        var ggit=0;
+        function initLabelMaterial( text ) {
 
+            var canvas = document.createElement( 'canvas' );
+
+            canvas.width = 256;
+            canvas.height = 64;
+
+            var ctx = canvas.getContext( '2d' );
+
+            ctx.fillStyle = 'white';
+            ctx.fillRect( 0, 0, canvas.width, canvas.height );
+
+            ctx.fillStyle = 'black';
+            ctx.font = `20pt Arial`;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+
+            ctx.fillText( text, 12, 32 );
+
+            var map = new THREE.CanvasTexture( canvas );
+
+            return new THREE.SpriteMaterial( { map } )
+
+        }
         controls.update();
-        function addBlock(x,y,z){
-            var mesh  = new THREE.Mesh(geometry, material);
-            mesh.position.x = x;
-            mesh.position.z = z;
-            mesh.position.y = y;
-            var geo = new THREE.EdgesGeometry( cube.geometry );
-            var mat = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 10 } );
-            var wireframe = new THREE.LineSegments( geo, mat );
-            scene.add(mesh);
-            mesh.add(wireframe);
+        function addBlock(x,y,z,name){
+            let ile = 0;
+            let leng = 0;
+            let uuids = [];
+            for (let i=0;i<blocks.length;i++){
+                let blok = JSON.parse(blocks[i]);
+                if(blok.x == x && blok.y == y && blok.z == z){
+                    if(blok.name==name){
+                        ggit+=1;
+                        //sasa
+                    }else{
+                        ile+=1;
+                        let obj = scene.getObjectByName(blok.name);
+                        console.log(obj.uuid);
+                        scene.remove(obj);
+                        if(name=="fake"){
+                            return;
+                        }
+                    }
+                    console.log(name+" "+blok.name+"   ");
+
+                }else{
+                    leng+=1;
+                }
+            }
+            if(leng==blocks.length){
+                if(name=="fake"){
+                    return;
+                }
+                console.log(ile);
+                let mesh = new THREE.Mesh(geometry, material);
+                mesh.position.x = x;
+                mesh.position.z = z;
+                mesh.position.y = y;
+                mesh.name = name;
+                let geo = new THREE.EdgesGeometry( cube.geometry );
+                let mat = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 10 } );
+                let wireframe = new THREE.LineSegments( geo, mat );
+                let ss = scene.add(mesh);
+                mesh.add(wireframe);
+                return mesh;
+            }
+            if(ile>0){
+                if(name=="fake"){
+                    return;
+                }
+                console.log(ile);
+                let mesh = new THREE.Mesh(geometry, material);
+                mesh.position.x = x;
+                mesh.position.z = z;
+                mesh.position.y = y;
+                mesh.name = name;
+                let geo = new THREE.EdgesGeometry( cube.geometry );
+                let mat = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 10 } );
+                let wireframe = new THREE.LineSegments( geo, mat );
+                let ss = scene.add(mesh);
+                mesh.add(wireframe);
+                console.log(mesh+"mesh");
+                return mesh;
+            }
+            ile=0;
+
+
+        }
+        function addSprite(object){
+            console.log(object);
+            var position = new THREE.Vector3();
+            position.setFromMatrixPosition( object.matrixWorld );
+            let spriteLabel = new THREE.Sprite( initLabelMaterial( object.name ) );
+
+            spriteLabel.position.set( position.x, position.y+2, position.z );
+            spriteLabel.scale.set( 1, 0.25, 1 );
+
+            scene.add( spriteLabel );
+            setTimeout(function(){
+                scene.remove(spriteLabel)
+            },1000);
+        }
+        var blocks = [];
+
+        function onMouseMove( event ) {
+
+            // calculate mouse position in normalized device coordinates
+            // (-1 to +1) for both components
+
+            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+            mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+            const intersects = raycaster.intersectObjects( scene.children );
+
+            if(intersects[0]!=undefined){
+                console.log(intersects);
+                let ss=0;
+                for(let i =0;i<blocks.length;i++){
+                    let get = JSON.parse(blocks[i]);
+                    console.log(get.uuid+"    "+intersects[0].object.uuid);
+
+                    if(get.uuid==intersects[0].object.uuid){
+                        console.log(intersects[0].object.uuid);
+                        addSprite(intersects[0].object);
+                    }
+                }
+            }
+
 
 
         }
         function animate() {
-
+            raycaster.setFromCamera( mouse, camera );
+            const intersects = raycaster.intersectObjects( scene.children );
             requestAnimationFrame( animate );
 
             controls.update();
@@ -61,25 +175,39 @@
             renderer.render( scene, camera );
 
         }
+
         var xz =0;
         var yz = 0;
         var zz = 0;
         function test(){
             sendCommand("giveMap");
         }
+        window.addEventListener( 'mousemove', onMouseMove, false );
         animate();
         function sendCommand(cmd){
-            ws.send(`{"typ":"client","cmd":${cmd}}`);
+            ws.send(`{"typ":"client","cmd":"${cmd}"}`);
         }
-        setInterval(test,500);
+        setInterval(test,1000);
+        ws.onmessage = function(txt){
+            txt = JSON.parse(txt.data);
+            
+            switch(txt.typ){
+                case "jsonMap":
+                    let info = addBlock(parseInt(txt.x),parseInt(txt.y),parseInt(txt.z),txt.name);
+                    if(ggit>0){
+                        ggit=0;
+                        break;
+                    }
+                    if(info.uuid!=undefined) {
+                        blocks.push(`{"name":"${txt.name}","x":${txt.x},"y":${txt.y},"z":${txt.z},"uuid":"${info.uuid}"}`);
+                    }
 
-        ws.onmessage(function(txt){
-            txt = JSON.parse(txt);
-            console.log(txt);
-            switch(txt){
-                
+                break;
             }
-        });
+        };
+        setInterval(function(){
+           addBlock(0,0,0,"fake");
+        },1000);
 
         /*
         var pressedKeys = {};
