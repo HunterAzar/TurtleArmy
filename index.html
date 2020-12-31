@@ -72,13 +72,11 @@
                     }else{
                         ile+=1;
                         let obj = scene.getObjectByName(blok.name);
-                        console.log(obj.uuid);
                         scene.remove(obj);
                         if(name=="fake"){
                             return;
                         }
                     }
-                    console.log(name+" "+blok.name+"   ");
 
                 }else{
                     leng+=1;
@@ -88,7 +86,7 @@
                 if(name=="fake"){
                     return;
                 }
-                console.log(ile);
+
                 let mesh = new THREE.Mesh(geometry, material);
                 mesh.position.x = x;
                 mesh.position.z = z;
@@ -105,7 +103,7 @@
                 if(name=="fake"){
                     return;
                 }
-                console.log(ile);
+
                 let mesh = new THREE.Mesh(geometry, material);
                 mesh.position.x = x;
                 mesh.position.z = z;
@@ -116,7 +114,6 @@
                 let wireframe = new THREE.LineSegments( geo, mat );
                 let ss = scene.add(mesh);
                 mesh.add(wireframe);
-                console.log(mesh+"mesh");
                 return mesh;
             }
             ile=0;
@@ -124,7 +121,6 @@
 
         }
         function addSprite(object){
-            console.log(object);
             var position = new THREE.Vector3();
             position.setFromMatrixPosition( object.matrixWorld );
             let spriteLabel = new THREE.Sprite( initLabelMaterial( object.name ) );
@@ -149,14 +145,10 @@
             const intersects = raycaster.intersectObjects( scene.children );
 
             if(intersects[0]!=undefined){
-                console.log(intersects);
                 let ss=0;
                 for(let i =0;i<blocks.length;i++){
                     let get = JSON.parse(blocks[i]);
-                    console.log(get.uuid+"    "+intersects[0].object.uuid);
-
                     if(get.uuid==intersects[0].object.uuid){
-                        console.log(intersects[0].object.uuid);
                         addSprite(intersects[0].object);
                     }
                 }
