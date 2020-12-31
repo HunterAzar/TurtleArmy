@@ -8,3 +8,4 @@
     - [x] useless Labels
     - [x] Auto replace older blocks
     - [ ] Make it async (and maybe obiect oriented we'll see)
+    - [ ] Make GUI
