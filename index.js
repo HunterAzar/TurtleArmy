@@ -13,6 +13,7 @@ const wsServer = new WebSocketServer({
 turtle = [];
 turtles = [];
 names = ["Tobiasz","Hunter","Łukasz","Wakanda","Walera-Chan"];
+console.log("GIT");
 wsServer.on('request', function(request) {
     const connection = request.accept(null, request.origin);
     connection.on('message', function(message) {
@@ -52,6 +53,9 @@ wsServer.on('request', function(request) {
                         db.each("select x,y,z,name from blocks",function(err,row){
                             connection.send(`{"typ":"jsonMap","x":${row.x},"y":${row.y},"z":${row.z},"name":"${row.name}"}`);
                         });
+                    }
+                    if(json.cmd == "deleteBlock"){
+                        db.exec(`delete from blocks where x=${json.x} and y=${json.y} and z=${json.z} and name="${json.name}"`);
                     }
                 }
             }

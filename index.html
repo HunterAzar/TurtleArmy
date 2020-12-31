@@ -72,7 +72,14 @@
                     }else{
                         ile+=1;
                         let obj = scene.getObjectByName(blok.name);
-                        scene.remove(obj);
+                        console.log("CHCE USUNAC OBJECT: "+obj.uuid+"   "+obj.position.z);
+                        if(x==obj.position.x && y==obj.position.y && z==obj.position.z){
+                            scene.remove(obj);
+                            blocks.splice(i,i);
+                            //oby działało xD
+                            ws.send(`{"type":"client","cmd":"deleteBlock","x":${x},"y":${y},"z":${z},"name":"${name}"}`);
+                        }
+                        
                         if(name=="fake"){
                             return;
                         }
